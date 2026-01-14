@@ -34,8 +34,19 @@ const loginpage = async (req, res) => {
     // SINGLE TOKEN CREATION
     createTokenAndSaveCookie(user._id, res);
     // createTokenAndSaveCookie(user._id, res);
-    const token = jwt.sign({ userId: user._id, email: user.email }, secretKey, {
-      expiresIn: '3d',
+    // const token = jwt.sign({ userId: user._id, email: user.email }, secretKey, {
+    //   expiresIn: '3d',
+    // })
+
+    const token = jwt.sign(
+      { userId: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: "3d" }
+    );
+    res.cookie("token", token, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: false, // true only after HTTPS
     })
     // console.log("token", token);
     return res.status(200).json({

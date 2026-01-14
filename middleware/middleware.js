@@ -1,16 +1,18 @@
-import jwt from 'jsonwebtoken';
-const authentication = (req, res, next)=>{
-    const token=req.cookies.jwt;;
-    if(!token){
-        return res.status(401).json({messsage:"Unauthorized"});
+import jwt from "jsonwebtoken";
+
+const authentication = (req, res, next) => {
+    const token = req.cookies?.token;
+
+    if (!token) {
+        return res.status(401).json({ message: "Unauthorized" });
     }
+
     try {
-        req.user=jwt.verify(token, process.env.JWT_TOKEN);
-         res.setHeader("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
+        req.user = jwt.verify(token, process.env.JWT_SECRET);
         next();
-    } catch (error) {
-        console.log("error", error);
-        return res.status(403).json({messsage:"Forbidden"});
+    } catch (err) {
+        return res.status(403).json({ message: "Forbidden" });
     }
 };
+
 export default authentication;

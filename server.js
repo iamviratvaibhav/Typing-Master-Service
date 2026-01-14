@@ -13,10 +13,30 @@ dotenv.config();
 const app = express();
 
 // Middleware
-app.use(cors({
-  origin: "http://localhost:5173", // your frontend port
-  credentials: true
-}));
+// app.use(cors({
+//   origin: "http://localhost:5173", // your frontend port
+//   credentials: true
+// }));
+
+const allowedOrigins = [
+  "http://localhost:5173",   // local FE
+  // later you will add deployed FE URL here
+];
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // allow requests with no origin (Postman, mobile apps)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(cookieParser());
 
