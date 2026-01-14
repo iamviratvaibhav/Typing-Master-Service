@@ -7,6 +7,7 @@ import mongoose from "mongoose";
 import User from "./models/userModels.js"; // Make sure this path is correct
 import createTokenAndSaveCookie from "./JWT/generateToken.js"; // Optional for auth
 import router from "./routes/route.js";
+import connectCloudinary from "./config/cloudinary.js";
 dotenv.config();
 
 const app = express();
@@ -20,7 +21,12 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use('/api', router)
+app.use((req, res, next) => {
+  console.log("➡️", req.method, req.originalUrl);
+  next();
+});
 
+connectCloudinary(); 
 //Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
@@ -78,7 +84,7 @@ app.get("/auth/google/callback", async (req, res) => {
 });
 
 // REST API for Google Login from frontend JWT (POST /typing-master/google-signup-login)
-app.post("/typing-master/google-signup-login", async (req, res) => {
+app.post("/api/google-signup-login", async (req, res) => {
   const { email, name } = req.body;
 
   try {
@@ -110,7 +116,7 @@ app.post("/typing-master/google-signup-login", async (req, res) => {
   }
 });
 
-// ✅ Start Server
+//  Start Server
 app.listen(5000, () => {
   console.log(" Server running on http://localhost:5000");
 });

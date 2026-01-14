@@ -1,12 +1,9 @@
 import mongoose from "mongoose";
 
 const userSchemaProfile = new mongoose.Schema({
-    firstName:{
-        type:String,
-        required:true,
-    }, 
-    lastName:{
-        type:String,
+    userId:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"User",
         required:true,
     },
     profession:{
@@ -29,5 +26,5 @@ const userSchemaProfile = new mongoose.Schema({
     
 })
 
-const userSchemaProfileModel = mongoose.model.user || mongoose.model("user", userSchemaProfile)
+const userSchemaProfileModel = mongoose.model.user || mongoose.model("UserProfileModel", userSchemaProfile)
 export default userSchemaProfileModel; 

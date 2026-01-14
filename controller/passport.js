@@ -1,29 +1,3 @@
-// import passport from "passport";
-// import GoogleStrategy from "passport-google-oauth20";
-
-// passport.use(
-//   new GoogleStrategy(
-//     {
-//       clientID: process.env.GOOGLE_CLIENT_ID,
-//       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-//       callbackURL: "/auth/google/callback",
-//     },
-//     (accessToken, refreshToken, profile, done) => {
-//       // You can store user to DB here
-//       // console.log(profile);
-//       return done(null, profile);
-//     }
-//   )
-// );
-
-// passport.serializeUser((user, done) => {
-//   done(null, user);
-// });
-// passport.deserializeUser((obj, done) => {
-//   done(null, obj);
-// });
-
-
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import User from './models/userModels.js';
@@ -32,9 +6,10 @@ dotenv.config();
 
 passport.use(new GoogleStrategy(
   {
-    clientID: process.env.GOOGLE_CLIENT_ID,       // ✅ Must be defined
-    clientSecret: process.env.GOOGLE_CLIENT_SECRET, // ✅ Must be defined
-    callbackURL: 'http://localhost:5000/auth/google/callback',
+    clientID: process.env.GOOGLE_CLIENT_ID,       
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET, 
+  
+    callbackURL: process.env.REDIRECT_URI,
   },
   async (accessToken, refreshToken, profile, done) => {
     // Check if user exists in DB or create one

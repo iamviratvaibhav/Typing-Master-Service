@@ -5,57 +5,58 @@ import OAuthAccount from "../models/OAuthAccount.js";
 import createTokenAndSaveCookie from "../JWT/generateToken.js";
 
 const googleLogin = async (req, res) => {
-  const { email, name, sub: googleId } = req.body; // `sub` = Google user ID
+  const { email, name, sub: googleId } = req.body;
   const provider = "google";
   const providerAccountId = googleId;
 
   try {
-    const oauthAccount = await OAuthAccount.findOne({ provider, providerAccountId }).populate("user");
+    // 1️ Check OAuth account
+    let oauthAccount = await OAuthAccount
+      .findOne({ provider, providerAccountId })
+      .populate("user");
 
-    if (!oauthAccount) {
-      // Create new user and link to OAuth account
-      const newUser = new User({
-        name,
-        email,
-        password: "google-auth"
-      });
-      await newUser.save();
-
-      const newOAuthAccount = new OAuthAccount({
-        user: newUser._id,
-        provider,
-        providerAccountId
-      });
-      await newOAuthAccount.save();
-
-      createTokenAndSaveCookie(newUser._id, res);
-
-      return res.status(201).json({
-        message: "New Google user created and logged in",
-        user: {
-          _id: newUser._id,
-          name: newUser.name,
-          email: newUser.email,
-        }
+    if (oauthAccount) {
+      createTokenAndSaveCookie(oauthAccount.user._id, res);
+      return res.status(200).json({
+        message: "Google login successful",
+        user: oauthAccount.user,
       });
     }
 
-    // User exists – log in
-    const existingUser = oauthAccount.user;
-    createTokenAndSaveCookie(existingUser._id, res);
+    // 2️ Check existing user by email
+    let user = await User.findOne({ email });
 
-    return res.status(200).json({
-      message: "Google login successful",
-      user: {
-        _id: existingUser._id,
-        name: existingUser.name,
-        email: existingUser.email,
-      }
+    if (!user) {
+      // 3️ Create new user
+      user = await User.create({
+        name,
+        email,
+        // password: "google-auth", // placeholder
+        password: null,
+        authProvider: "google",   // recommended
+      });
+    }
+
+    // 4️ Create OAuthAccount link
+    await OAuthAccount.create({
+      user: user._id,
+      provider,
+      providerAccountId,
     });
+
+    createTokenAndSaveCookie(user._id, res);
+
+    return res.status(201).json({
+      message: "Google login successful",
+      user,
+    });
+
   } catch (error) {
     console.error("Google OAuth login error:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+
 
 export default googleLogin;

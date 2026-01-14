@@ -15,6 +15,15 @@ const userSchema = mongoose.Schema({
         type: String,
         required: true,
     },
+    userName:{
+        type:String,
+        required:false,
+    },
+    authProvider: {
+        type: String,
+        enum: ["local", "google"],
+        default: "local"
+    }
 
 
 }, {
@@ -24,5 +33,5 @@ const userSchema = mongoose.Schema({
 }
 )
 
-const User=mongoose.model('User', userSchema);
+const User = mongoose.model('User', userSchema);
 export default User;
