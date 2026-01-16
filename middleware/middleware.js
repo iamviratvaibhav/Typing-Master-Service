@@ -1,18 +1,21 @@
 import jwt from "jsonwebtoken";
 
 const authentication = (req, res, next) => {
-    const token = req.cookies?.token;
+  try {
+    const token = req.cookies.token;
 
     if (!token) {
-        return res.status(401).json({ message: "Unauthorized" });
+      return res.status(401).json({ message: "No token provided" });
     }
 
-    try {
-        req.user = jwt.verify(token, process.env.JWT_SECRET);
-        next();
-    } catch (err) {
-        return res.status(403).json({ message: "Forbidden" });
-    }
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    req.user = decoded; // { userId }
+    next();
+  } catch (error) {
+    console.error("JWT error:", error.message);
+    return res.status(401).json({ message: "Invalid token" });
+  }
 };
 
 export default authentication;

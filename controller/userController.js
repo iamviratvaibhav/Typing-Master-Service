@@ -30,25 +30,8 @@ const loginpage = async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-
-    // SINGLE TOKEN CREATION
     createTokenAndSaveCookie(user._id, res);
-    // createTokenAndSaveCookie(user._id, res);
-    // const token = jwt.sign({ userId: user._id, email: user.email }, secretKey, {
-    //   expiresIn: '3d',
-    // })
 
-    const token = jwt.sign(
-      { userId: user._id },
-      process.env.JWT_SECRET,
-      { expiresIn: "3d" }
-    );
-    res.cookie("token", token, {
-      httpOnly: true,
-      sameSite: "lax",
-      secure: false, // true only after HTTPS
-    })
-    // console.log("token", token);
     return res.status(200).json({
       success: true,
       message: "Login successful",
@@ -65,64 +48,15 @@ const loginpage = async (req, res) => {
 };
 
 
-// const loginpage = async (req, res) => {
-//   const { email, password } = req.body;
-
-//   try {
-//     const user = await User.findOne({ email });
-
-//     if (!user) {
-//       return res.status(400).json({ message: "Invalid credentials" });
-//     }
-
-//     if (user.authProvider === 'google') {
-//       return res.status(401).json({ message: "Do Login with Google" });
-//     }
-
-//     const isMatch = await bcrypt.compare(password, user.password);
-//     if (!isMatch) {
-//       return res.status(400).json({ message: "Invalid credentials" });
-//     }
-
-//     // ✅ Create token ONCE (you were calling it twice ❌)
-//     createTokenAndSaveCookie(user._id, res);
-
-//     // ✅ 3-second delay
-//     await new Promise(resolve => setTimeout(resolve, 3000));
-
-//     return res.status(200).json({
-//       success: true,
-//       message: "Login successful",
-//       user: {
-//         _id: user._id,
-//         name: user.name,
-//         email: user.email,
-//       },
-//     });
-
-//   } catch (error) {
-//     console.error(error);
-//     return res.status(500).json({ message: "Internal server error" });
-//   }
-// };
-
-
 const logout = async (req, res) => {
-  try {
-    res.clearCookie("jwt", {
-      httpOnly: true,
-      sameSite: "none",
-      secure: true
-    });
+  res.clearCookie("token", {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/"
+  });
 
-    return res.status(200).json({
-      success: true,
-      message: "Logout successful"
-    });
-  } catch (error) {
-    console.error("Logout error:", error);
-    res.status(500).json({ message: "Internal server error" });
-  }
+  return res.status(200).json({ success: true });
 };
 
 
@@ -168,7 +102,8 @@ const signupPage = async (req, res) => {
 
 
 const getUserEmailAndName = async (req, res) => {
-  const id = req.params.id;
+  // const id = req.params.id;
+  const id = req.user.userId;
   try {
     if (!id) {
       console.log("User id not found");
@@ -237,7 +172,7 @@ const userProfile = async (req, res) => {
 };
 
 const getUserProfile = async (req, res) => {
-  const userId = req.params.id;
+  const userId = req.user.userId;
   try {
 
     const profile = await UserProfileModel

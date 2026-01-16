@@ -8,10 +8,10 @@ const router=express.Router();
 router.post('/signup', signupPage);
 router.post('/login', loginpage);
 router.post('/logout', logout);
-router.get('/get-userEmail/:id', getUserEmailAndName);
+router.get('/get-userEmail',authentication, getUserEmailAndName);
 router.post('/insertingData',authentication, insertUserProgressData);
-router.get('/getUserProgressData/:id',authentication, getUserProgressData);
-router.get('/getUserProfile/:id',authentication, getUserProfile);
+router.get('/getUserProgressData',authentication, getUserProgressData);
+router.get('/getUserProfile',authentication, getUserProfile);
 router.post("/userProfile",authentication, upload.single("profileImage") ,userProfile);
 router.post('/google-signup-login',  googleLogin);
 
